@@ -1,4 +1,18 @@
-"""Min heap implemented with a Python list."""
+"""Min heap implemented with a Python list.
+
+We start the list at index 1 instead of 0, otherwise the math won't work out.
+
+A child at index i has a parent at index i // 2. A parent at index i has
+children at i * 2 and i * 2 + 1.
+
+For example, this list [None, 1, 2, 3, 4, 5, 6] becomes a heap that looks
+like this:
+                 1
+              /     \
+             2       3
+           /   \   /
+          4    5  6
+"""
 
 class MinHeap:
     def __init__(self, initial=None):
@@ -10,24 +24,19 @@ class MinHeap:
     def __repr__(self):
         return str(self.heap)
 
-    def get_parent(self, i):
-        """Return the parent item of the given index."""
-
-        if i > 1:
-            return self.heap[i // 2]
-        else:
-            return None  # Error: the root does not have a parent
-
     def _shift_up(self, i):
         """Given an item's index, shift it as far up heap as it can go."""
         
         while i // 2 > 0:  # Parent should never be index of 0
+            
             # Compare item value to parent value and swap if item is smaller
             if self.heap[i] < self.heap[i // 2]:
                 self.heap[i], self.heap[i // 2] = self.heap[i // 2], self.heap[i]
-                i = i // 2
+                
+                i = i // 2  # Reassign i to the correct index
+
             else:
-                break  # We can fail here because item is in the right spot
+                break  # Exit out of while loop, item is in the right spot
 
     def _shift_down(self, i):
         """Given an item's index, shift it as far down as it can go."""
@@ -39,35 +48,36 @@ class MinHeap:
             except IndexError:
                 child_2 = None
 
-            if self.heap[i] < child_1:  # item is smaller than its children
-                print "Heap is already valid"
+            if self.heap[i] < child_1:
+                # The item must be smaller than all of its children, so we can
+                # exit the while loop
                 break
 
-            if child_2:
-                # Swap with the smallest child to maintain order
-                if child_1 < child_2:
-                    self.heap[i], self.heap[i * 2] = self.heap[i * 2], self.heap[i]
-                    i = i * 2
-                else:
-                    self.heap[i], self.heap[i * 2 + 1] = self.heap[i * 2 + 1], self.heap[i]
-                    i = i * 2 + 1
-            else:  # child_2 doesn't exist and the item is larger than its child
+            # Swap with the smallest child to maintain order, then reassign
+            # the index
+            if child_1 < child_2 or not child_2:
                 self.heap[i], self.heap[i * 2] = self.heap[i * 2], self.heap[i]
                 i = i * 2
+            else:
+                self.heap[i], self.heap[i * 2 + 1] = self.heap[i * 2 + 1], self.heap[i]
+                i = i * 2 + 1
 
     def push(self, el):
-        """Add an item to the heap."""
+        """Add an item to the end of the heap.
+        
+        Shifts the added item to its appropriate location.
+        """
         
         self.heap.append(el)
         self._shift_up(len(self.heap) - 1)
 
     def pop(self):
-        """Pop the min item."""
+        """Remove the smallest item in the heap and return it."""
 
         min_item = self.heap[1]
-        self.heap[1] = self.heap[-1]
+        self.heap[1] = self.heap[-1]  # Place the last item at the root
         del self.heap[-1]  # Last item no longer exists
         
-        self._shift_down(1)
+        self._shift_down(1)  # Shift the item down to its correct location
 
         return min_item
